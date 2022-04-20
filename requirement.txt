@@ -1,1 +1,3 @@
 pydantic[dotenv]
+httpx
+devtools
