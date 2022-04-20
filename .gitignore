@@ -1,0 +1,27 @@
+# IDE
+.idea/
+.vscode/
+
+# virtual environments
+.env
+env/
+venv/
+
+# python
+**/__pycache__/
+*.pyc
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
