@@ -1,3 +1,5 @@
 pydantic[dotenv]
 httpx
 devtools
+pytest-asyncio
+pytest-cov

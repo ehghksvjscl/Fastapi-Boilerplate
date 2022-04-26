@@ -1,15 +1,28 @@
 from fastapi import APIRouter, Body, Request, Depends
 from pydantic import HttpUrl
 from sqlalchemy.orm.session import Session
+from sqlalchemy import func
 
-from app import models
+from app import models, schemas
 from app.config import settings
 from app.database import get_db
 from app.lib.telegram import telegram, schema
 
+from devtools import debug
+
 router = APIRouter()
 bot = telegram.Telegram(settings.TELEGRAM_BOT_TOKEN)
 
+def add_user(user: schemas.User, db: Session) -> models.User:
+    row = models.User(
+        id=user.id,
+        username=user.username,
+        first_name=user.first_name,
+        last_name=user.last_name,
+    )
+    db.add(row)
+    db.commit()
+    return row
 
 @router.get("")
 async def get_webhook():
@@ -26,16 +39,36 @@ async def webhook(request: Request, db: Session = Depends(get_db)):
     resp = await request.json()
     update = schema.Update.parse_obj(resp)
     user = update.message.from_
+    message = update.message
+
     db_user = db.query(models.User).filter_by(id=user.id).first()
 
     if db_user is None:
-        row = models.User(
-            id=user.id,
-            username=user.username,
-            first_name=user.first_name,
-            last_name=user.last_name,
-        )
-        db.add(row)
-        db.commit()
+        db_user = add_user(user, db)
+
+    msg = "문제 또는 퀴즈 라고 말씀하시면 문제를 냅니다!"
+    
+    if "문제" in message.text or "퀴즈" in message.text:
+        quiz = db.query(models.Quiz).order_by(func.random()).first()
+
+        if not quiz:
+            await bot.send_message(message.chat.id, "퀴즈가 없습니다")
+            return
+
+        db_user.quiz_id = quiz.id
+        msg = f"{quiz.question}\n\n{quiz.content}"
+    elif db_user.quiz_id and message.text.isnumeric():
+        correct = db_user.quiz.answer == int(message.text)
+
+        msg = f"아쉽네요, {db_user.quiz.answer}번이 정답입니다."
+
+        if correct:
+            db_user.score += 1
+            msg = f"{db_user.quiz.answer}번 정답입니다!"
+
+        db_user.quiz_id = None
+    
+    await bot.send_message(message.chat.id, msg)
+    db.commit()
 
     return "OK"

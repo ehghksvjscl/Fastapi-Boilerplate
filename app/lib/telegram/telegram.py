@@ -1,4 +1,5 @@
 from ctypes import Union
+from http import client
 from typing import Union
 
 import httpx # requests는 비동기를 지원하지 않음
@@ -32,4 +33,11 @@ class Telegram:
 
     async def set_webhook(self, url) -> dict:
         r = await self.client.post("setWebhook", data={"url": url})
+        return r.json()
+
+    async def send_message(self, chat_id: int, text: str):
+        r = await self.client.post("sendMessage", data={
+            "chat_id":chat_id,
+            "text": text
+        })
         return r.json()
