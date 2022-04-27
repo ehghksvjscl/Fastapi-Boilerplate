@@ -9,10 +9,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:13
         ports:
-          - 3306:3306
+          - 5432:5432
         env:
           MYSQL_DATABASE: testing
           MYSQL_ROOT_PASSWORD: 1234
@@ -22,11 +22,11 @@ jobs:
 
     steps:
       # MySQL 서비스 될 때까지 대기
-      - name: MySQL health check
+      - name: Postgres health check
         env:
-          PORT: ${{ job.services.mysql.ports[3306] }}
+          PORT: ${{ job.services.postgres.ports[5432] }}
         run: |
-          while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
+          while ! postgresadmin ping -h"127.0.0.1" -P"$PORT" --silent; do
             sleep 1
           done
       # 파이썬 설정
@@ -50,7 +50,7 @@ jobs:
           DB_USERNAME: admin
           DB_PASSWORD: 1234
           DB_HOST: 127.0.0.1
-          DB_PORT: 3306
+          DB_PORT: 5432
           DB_NAME: testing
         run: |
           pytest
