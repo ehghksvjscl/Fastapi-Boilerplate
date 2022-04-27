@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:13
+        image: postgres
         ports:
           - 5432:5432
         env:
-          MYSQL_DATABASE: testing
-          MYSQL_ROOT_PASSWORD: 1234
-          MYSQL_USER: admin
-          MYSQL_PASSWORD: 1234
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+          POSTGRES_PASSWORD: 1234
+          TZ: "Asia/Seoul"
 
     steps:
       # MySQL 서비스 될 때까지 대기
@@ -47,11 +44,11 @@ jobs:
         env:
           TESTING: true
           TELEGRAM_BOT_TOKEN: 123:sometoken
-          DB_USERNAME: admin
+          DB_USERNAME: postgres
           DB_PASSWORD: 1234
           DB_HOST: 127.0.0.1
           DB_PORT: 5432
-          DB_NAME: testing
+          DB_NAME: postgres
         run: |
           pytest
           zip -r9 report.zip htmlcov/
