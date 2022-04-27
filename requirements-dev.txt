@@ -3,4 +3,4 @@ devtools
 flake8
 pytest
 pytest-cov
-pytest-asynci
+pytest-asyncio
