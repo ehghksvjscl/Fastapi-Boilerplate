@@ -18,14 +18,6 @@ jobs:
           TZ: "Asia/Seoul"
 
     steps:
-      # MySQL 서비스 될 때까지 대기
-      - name: Postgres health check
-        env:
-          PORT: ${{ job.services.postgres.ports[5432] }}
-        run: |
-          while ! postgresadmin ping -h"127.0.0.1" -P"$PORT" --silent; do
-            sleep 1
-          done
       # 파이썬 설정
       - uses: actions/checkout@v2
       - name: Set up Python
